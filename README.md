@@ -161,7 +161,7 @@ Below is an example one-line command to run **Rand pruning** at compression=0.2 
 Omit the `--quantization` flag to train in full FP32 precision.
 
 
-As in previous tasks, let *compression* $\in \{0.2, 0.5, 1\}$. Prune with **Rand** for each compression value, **once with AMP** (`--quantization`) and **once without** it. For the non-quantized runs, rely on the verbose logs from Section 2 to collect the relevant metrics 
+As in previous tasks, let *compression* $\in$ {0.2, 0.5, 1}. Prune with **Rand** for each compression value, **once with AMP** (`--quantization`) and **once without** it. For the non-quantized runs, rely on the verbose logs from Section 2 to collect the relevant metrics 
 
 In your write-up, present a table comparing memory usage and training time for each compression level, with and without AMP. 
 
