@@ -48,7 +48,7 @@ If you are using Google Colab, to accommodate the limited resources on Google Co
 
 ### 1. Hyper-parameter tuning
 
-#### Testing on different archietectures. Please fill the results table:
+#### Testing on different architectures. Please fill the results table:
 *Test accuracy (top 1)* of pruned models on CIFAR10 and MNIST (sparsity = 10%). `--compression 1` means sparsity = 10^-1.
 ```
 python main.py --model-class lottery --model resnet20 --dataset cifar10 --experiment singleshot --pruner synflow --compression 1
@@ -108,19 +108,25 @@ python main.py --model-class lottery --model resnet20 --dataset cifar10 --experi
 
 1. Load the trace to Chrome browser (open ```chrome://tracing``` on Chrome, and download the `trace.json` and click on the load button), and take a screenshot. Report the GPU hardware details via `nvidia-smi` on terminal. 
 
-- We expect at least 2 streams/rows appear: a python cpu stream and at least 1 CUDA stream to appear in the tracing result. However, tracing might fail to capture CUDA stream for some recent GPUs or PyTorch versions. In this case, we could use an older PyTorch version (e.g. 2.5.1) or older GPU version (Ampere or Hopper generation, or consumer-graded GPUs such as RTX 3090 or RTX 4090).
+- **We expect at least 2 streams/rows appear: a python cpu stream and at least 1 CUDA stream to appear in the tracing result.** However, tracing might fail to capture CUDA stream for some recent GPUs or PyTorch versions. In this case, we could use an older PyTorch version (e.g. 2.5.1) and older GPU versions with older CUDA toolkits (Ampere or Hopper GPUs than Blackwell GPUs, or consumer-graded GPUs such as RTX 3090 or RTX 4090).
 
-2. From the trace, **calculate the total CUDA time spent on all convolution layers for a single step.** You may find there are a lot of "bubbles" on the CUDA stream and there might be multiple launched CUDA streams. **We should disregard most of large bubbles and sum up the CUDA convolution kernel time for all CUDA stream**. Please be wise on the  Calculate the percentage of convolution CUDA kernel time over the total time spent for this inference step.
+- An example of a CPU and a CUDA stream: 
+![Example on calculating time](Results/Plots/trace-successful.png)
 
-Hint: please refer to this screenshot to see an example of convolution CUDA kernel time for 1 layer. We have 3 launched CUDA streams by `aten::con2d` (PyTorch native convolution call on the CPU host), and the kernels boxed in blue are the corresponding CUDA kernels.
+
+- If the CUDA stream fails to appear, we can switch to a different PyTorch and GPU version for this task from task 1. 
+
+
+2. From the trace, **calculate the total CUDA time spent on all convolution layers for a single step.** You may find there are a lot of "bubbles" on the CUDA stream and there might be multiple launched CUDA streams. **We should disregard large bubble time and only sum up the actual CUDA convolution kernel time**. If there are multiple CUDA stream executed on parallel, we treat the total time as the time where at least 1 CUDA kernel is running. Calculate the percentage of convolution CUDA kernel time over the total time spent for this inference step.
+
+- Hint: this is an example of convolution CUDA kernel time for 1 layer. We have 3 launched CUDA streams by `aten::con2d` (PyTorch native convolution call on the CPU host), and the kernels boxed in blue are the corresponding CUDA kernels.
 ![Example convolution kernel runtime for 1 layer](Results/Plots/cudnn-convolution-kernel-example.png)
 
-For convenience, we can take the interval of multiple kernels as their summation time **if the gap/bubbles between these kernels are *small***. The following screenshot shows an example of 112 us time interval as the summed time of multiple convolution-related kernels. **Please make a wise decision between small and large gap**.
+- For convenience, we can take the interval of multiple kernels as their total time **if the gap/bubbles between these kernels are *small***. The following screenshot shows an example of 113 us time interval as the total time of multiple convolution-related kernels. **Please make a wise classification between small and large gap**.
 ![Example on calculating time](Results/Plots/cudnn-convolution-kernel-time.png)
 
-Open-ended question:
 
-1. Analyze the major source of time spent during inference, and propose 2 solutions that may accelerate the inference. For this question, we don't need to implement such solutions and a written analysis suffice. 
+3. (open-ended question) Analyze the major source of time spent during inference, and propose 2 solutions that may accelerate the inference. For this question, we don't need to implement such solutions and a written analysis suffice. 
 
 
 ### 3. The compression ratio 
