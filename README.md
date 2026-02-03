@@ -66,7 +66,7 @@ python main.py --model-class default --model fc --dataset cifar10 --experiment s
 
 #### Tuning compression ratio. Please fill the results table:
 ##### Model summary after pruning
-Prune models on CIFAR10 with ResNet20, please replace {} with sparsity 10^-a for a \in {0.2,0.5,1}. Feel free to try other sparsity values. 
+Prune models on CIFAR10 with ResNet20, please replace {} with sparsity 10^-a for a $\in$ {0.2,0.5,1}. Feel free to try other sparsity values. 
 
 ```
 python main.py --model-class lottery --model resnet20 --dataset cifar10 --experiment singleshot --pruner synflow  --compression {}
